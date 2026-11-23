@@ -1,0 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.mycompany.cizagui.Enum;
+
+/**
+ *
+ * @author ary
+ */
+public enum StatusAtendimentoEnum {
+    AGENDADO, CANCELADO, CONCLUIDO, NAO_COMPARECEU, REMARCADO
+}
