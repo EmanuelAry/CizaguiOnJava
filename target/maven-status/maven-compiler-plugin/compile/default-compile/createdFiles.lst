@@ -47,7 +47,6 @@ com/mycompany/cizagui/controller/ManutencaoClienteController.class
 com/mycompany/cizagui/contracts/controller/INavegacao.class
 com/mycompany/cizagui/dao/ClienteDao.class
 com/mycompany/cizagui/contracts/controller/IConsultaAtendimentoController.class
-com/mycompany/cizagui/exeptions/RevisaoAnamineseException.class
 com/mycompany/cizagui/model/AtendimentoModel.class
 com/mycompany/cizagui/view/ConsultaAtendimentoView.class
 com/mycompany/cizagui/model/ClienteModel.class
@@ -63,8 +62,6 @@ com/mycompany/cizagui/dao/AtendimentoDao.class
 com/mycompany/cizagui/exeptions/LoginException.class
 com/mycompany/cizagui/contracts/controller/IManutencaoClienteController.class
 com/mycompany/cizagui/dao/InMemoryProntuarioDao.class
-com/mycompany/cizagui/contracts/model/IRevisaoAnamineseModel.class
-com/mycompany/cizagui/model/RevisaoAnamineseModel.class
 com/mycompany/cizagui/view/CadastroAtendimentoView$2.class
 com/mycompany/cizagui/view/ConsultaAtendimentoView$1.class
 com/mycompany/cizagui/Enum/StatusAtendimentoEnum.class

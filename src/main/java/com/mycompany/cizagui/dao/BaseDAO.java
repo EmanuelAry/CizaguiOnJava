@@ -18,7 +18,6 @@ public abstract class BaseDAO {
 
     private static final String[] CONSTRAINTS_AUXILIARES = {
         "CREATE UNIQUE INDEX IF NOT EXISTS uk_conta_acesso_cnpj_email ON conta_acesso (cnpj, email)",
-        "CREATE UNIQUE INDEX IF NOT EXISTS uk_revisao_anaminese_cliente_numero ON revisao_anaminese (cliente_id, numero)"
     };
 
 

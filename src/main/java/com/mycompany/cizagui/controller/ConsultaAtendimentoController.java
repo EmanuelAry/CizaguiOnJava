@@ -115,6 +115,7 @@ public class ConsultaAtendimentoController implements IConsultaAtendimentoContro
                 .filter(atendimento -> statusSelecionados.contains(atendimento.getStatus()))
                 .filter(atendimento -> clienteFiltroId == null
                         || atendimento.getClienteId().equals(clienteFiltroId))
+                .sorted(java.util.Comparator.comparing(IAtendimentoModel::getInicio).reversed())
                 .toList();
         String[][] linhas = this.atendimentos.stream()
                 .map(atendimento -> new String[]{
