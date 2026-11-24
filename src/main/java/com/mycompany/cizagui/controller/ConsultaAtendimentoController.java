@@ -86,7 +86,8 @@ public class ConsultaAtendimentoController implements IConsultaAtendimentoContro
     }
 
     private void carregarEvolucao(IAtendimentoModel atendimento) {
-        String texto = this.prontuarioDao.buscarEvolucaoPorAtendimento(atendimento.getId())
+        String texto = this.prontuarioDao.buscarEvolucaoPorAtendimento(
+                this.navegacao.exigirCnpjEntidadeAtual(), atendimento.getId())
                 .map(IEvolucaoModel::getTexto)
                 .orElse("");
         this.view.setEvolucao(texto);
@@ -94,7 +95,7 @@ public class ConsultaAtendimentoController implements IConsultaAtendimentoContro
 
     @Override
     public void prepararTela() {
-        this.clientes = this.clienteDao.listarTodos();
+        this.clientes = this.clienteDao.listarTodos(this.navegacao.exigirCnpjEntidadeAtual());
         List<String> opcoes = new ArrayList<>();
         opcoes.add("Todos");
         opcoes.addAll(this.clientes.stream().map(IClienteModel::getNome).toList());
@@ -109,7 +110,7 @@ public class ConsultaAtendimentoController implements IConsultaAtendimentoContro
         Set<StatusAtendimentoEnum> statusSelecionados = this.getStatusSelecionadosFromView();
         UUID clienteFiltroId = this.getClienteFiltroIdFromView();
 
-        this.atendimentos = this.atendimentoDao.listarTodos().stream()
+        this.atendimentos = this.atendimentoDao.listarTodos(this.navegacao.exigirCnpjEntidadeAtual()).stream()
                 .filter(atendimento -> filtroProfissional.isEmpty()
                         || atendimento.getProfissional().toLowerCase().contains(filtroProfissional))
                 .filter(atendimento -> statusSelecionados.contains(atendimento.getStatus()))
@@ -155,7 +156,7 @@ public class ConsultaAtendimentoController implements IConsultaAtendimentoContro
     }
 
     private String nomeCliente(UUID clienteId) {
-        return this.clienteDao.buscarPorId(clienteId)
+        return this.clienteDao.buscarPorId(this.navegacao.exigirCnpjEntidadeAtual(), clienteId)
                 .map(IClienteModel::getNome)
                 .orElse("(cliente removido)");
     }

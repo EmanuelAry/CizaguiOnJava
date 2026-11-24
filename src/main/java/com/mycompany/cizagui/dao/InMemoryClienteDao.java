@@ -21,10 +21,16 @@ public class InMemoryClienteDao implements IClienteDao {
     public Map<UUID, IClienteModel> clientes = new LinkedHashMap<>();
             
     @Override
-    public void salvar(IClienteModel cliente) throws ClienteException {
+    public void salvar(String entidadeCnpj, IClienteModel cliente) throws ClienteException {
+        exigirEntidade(entidadeCnpj, cliente.getEntidadeCnpj());
+        IClienteModel porId = clientes.get(cliente.getId());
+        if (porId != null && !entidadeCnpj.equals(porId.getEntidadeCnpj())) {
+            throw new ClienteException("O cliente não pertence à entidade autenticada.");
+        }
         String cpfProcurado = cliente.getCpf().replaceAll("\\D", "");
         boolean duplicado = clientes.values().stream()
                 .anyMatch(existente -> !existente.getId().equals(cliente.getId())
+                        && entidadeCnpj.equals(existente.getEntidadeCnpj())
                         && existente.getCpf().replaceAll("\\D", "").equals(cpfProcurado));
         if (duplicado) {
             throw new ClienteException("Já existe um cliente na base com o cpf informado");
@@ -33,23 +39,35 @@ public class InMemoryClienteDao implements IClienteDao {
     }
 
     @Override
-    public Optional<IClienteModel> buscarPorCpf(String cpf) {
+    public Optional<IClienteModel> buscarPorCpf(String entidadeCnpj, String cpf) {
         String cpfNormalizado = cpf.replaceAll("\\D", "");
-        return clientes.values().stream().filter(cliente -> cliente.getCpf().equals(cpfNormalizado)).findFirst();
+        return clientes.values().stream()
+                .filter(cliente -> entidadeCnpj.equals(cliente.getEntidadeCnpj()))
+                .filter(cliente -> cliente.getCpf().replaceAll("\\D", "").equals(cpfNormalizado))
+                .findFirst();
     }
     @Override
-    public Optional<IClienteModel> buscarPorId(UUID id) {
-        return Optional.ofNullable(clientes.get(id));
+    public Optional<IClienteModel> buscarPorId(String entidadeCnpj, UUID id) {
+        return Optional.ofNullable(clientes.get(id))
+                .filter(cliente -> entidadeCnpj.equals(cliente.getEntidadeCnpj()));
     }
 
     @Override
-    public void excluir(UUID id) {
-        clientes.remove(id);
+    public void excluir(String entidadeCnpj, UUID id) {
+        buscarPorId(entidadeCnpj, id).ifPresent(cliente -> clientes.remove(id));
     }
 
     @Override
-    public List<IClienteModel> listarTodos() {
-        return List.copyOf(clientes.values());
+    public List<IClienteModel> listarTodos(String entidadeCnpj) {
+        return clientes.values().stream()
+                .filter(cliente -> entidadeCnpj.equals(cliente.getEntidadeCnpj()))
+                .toList();
+    }
+
+    private static void exigirEntidade(String entidadeCnpj, String modeloCnpj) throws ClienteException {
+        if (entidadeCnpj == null || entidadeCnpj.isBlank() || !entidadeCnpj.equals(modeloCnpj)) {
+            throw new ClienteException("O cliente não pertence à entidade autenticada.");
+        }
     }
     
 }

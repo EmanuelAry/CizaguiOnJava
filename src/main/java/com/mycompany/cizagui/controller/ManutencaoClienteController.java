@@ -57,13 +57,13 @@ public class ManutencaoClienteController implements IManutencaoClienteController
     @Override
     public void acaoCadastrar() {
         try {
+            String entidadeCnpj = this.navegacao.exigirCnpjEntidadeAtual();
             IClienteModel cliente = this.getDadosClienteFromView();
             if (this.clienteSelecionado == null) {
-                this.clienteDao.salvar(cliente);
+                this.clienteDao.salvar(entidadeCnpj, cliente);
                 this.view.exibirMensagem("Cliente cadastrado com sucesso!");
             } else {
-                this.clienteDao.excluir(this.clienteSelecionado.getId());
-                this.clienteDao.salvar(cliente);
+                this.clienteDao.salvar(entidadeCnpj, cliente);
                 this.view.exibirMensagem("Cliente atualizado com sucesso!");
             }
             this.clienteSelecionado = null;
@@ -81,7 +81,7 @@ public class ManutencaoClienteController implements IManutencaoClienteController
             return;
         }
         try {
-            this.clienteDao.excluir(this.clienteSelecionado.getId());
+            this.clienteDao.excluir(this.navegacao.exigirCnpjEntidadeAtual(), this.clienteSelecionado.getId());
         } catch (ClienteException e) {
             this.view.exibirMensagem(e.getMessage());
             return;
@@ -115,10 +115,11 @@ public class ManutencaoClienteController implements IManutencaoClienteController
             throw new ClienteException("Todos os campos do cliente devem ser preenchidos.");
         }
         LocalDate dataNascimento = parseDataNascimento(dataNasc);
+        String entidadeCnpj = this.navegacao.exigirCnpjEntidadeAtual();
         if (this.clienteSelecionado != null) {
-            return new ClienteModel(this.clienteSelecionado.getId(), nome, cpf, dataNascimento, tel, email);
+            return new ClienteModel(this.clienteSelecionado.getId(), entidadeCnpj, nome, cpf, dataNascimento, tel, email);
         }
-        return new ClienteModel(nome, cpf, dataNascimento, tel, email);
+        return new ClienteModel(entidadeCnpj, nome, cpf, dataNascimento, tel, email);
     }
 
     private LocalDate parseDataNascimento(String data) throws ClienteException {

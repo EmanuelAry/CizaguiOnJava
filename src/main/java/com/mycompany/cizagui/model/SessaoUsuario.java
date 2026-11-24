@@ -29,6 +29,10 @@ public class SessaoUsuario {
     public String getNome() {
         return nome;
     }
+
+    public String getCnpj() {
+        return cnpj;
+    }
     
     public PerfilEnum getPerfil() {
         return perfil;

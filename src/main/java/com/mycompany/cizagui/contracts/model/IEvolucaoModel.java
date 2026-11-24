@@ -14,6 +14,7 @@ import java.util.UUID;
  */
 public interface IEvolucaoModel {
     UUID getId();
+    String getEntidadeCnpj();
     UUID getAtendimentoId();
     String getTexto();
     String getAutorNome();

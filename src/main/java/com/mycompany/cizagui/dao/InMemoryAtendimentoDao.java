@@ -21,9 +21,18 @@ public class InMemoryAtendimentoDao implements IAtendimentoDao{
     private final List<IAtendimentoModel> atendimentos = new ArrayList<>();
     
     @Override
-    public void salvar(IAtendimentoModel atendimento) throws AtendimentoException {
+    public void salvar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException {
+        exigirEntidade(entidadeCnpj, atendimento.getEntidadeCnpj());
+        IAtendimentoModel porId = atendimentos.stream()
+                .filter(item -> item.getId().equals(atendimento.getId()))
+                .findFirst()
+                .orElse(null);
+        if (porId != null && !entidadeCnpj.equals(porId.getEntidadeCnpj())) {
+            throw new AtendimentoException("O atendimento não pertence à entidade autenticada.");
+        }
         if (atendimento.ocupaHorario()) {
             boolean conflito = atendimentos.stream()
+                    .filter(existente -> entidadeCnpj.equals(existente.getEntidadeCnpj()))
                     .filter(existente -> !existente.getId().equals(atendimento.getId()))
                     .filter(existente -> existente.getClienteId().equals(atendimento.getClienteId()))
                     .filter(IAtendimentoModel::ocupaHorario)
@@ -37,14 +46,30 @@ public class InMemoryAtendimentoDao implements IAtendimentoDao{
     }
 
     @Override
-    public Optional<IAtendimentoModel> buscarPorId(UUID id) {
-        return atendimentos.stream().filter(item -> item.getId().equals(id)).findFirst();
+    public Optional<IAtendimentoModel> buscarPorId(String entidadeCnpj, UUID id) {
+        return atendimentos.stream()
+                .filter(item -> entidadeCnpj.equals(item.getEntidadeCnpj()))
+                .filter(item -> item.getId().equals(id))
+                .findFirst();
     }
 
     @Override
-    public void atualizar(IAtendimentoModel atendimento) throws AtendimentoException {
+    public void atualizar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException {
+        exigirEntidade(entidadeCnpj, atendimento.getEntidadeCnpj());
+        if (atendimento.ocupaHorario()) {
+            boolean conflito = atendimentos.stream()
+                    .filter(existente -> entidadeCnpj.equals(existente.getEntidadeCnpj()))
+                    .filter(existente -> !existente.getId().equals(atendimento.getId()))
+                    .filter(existente -> existente.getClienteId().equals(atendimento.getClienteId()))
+                    .filter(IAtendimentoModel::ocupaHorario)
+                    .anyMatch(existente -> AtendimentoModel.horariosConflitam(existente, atendimento));
+            if (conflito) {
+                throw new AtendimentoException("Já existe um atendimento para este cliente em horário conflitante");
+            }
+        }
         for (int indice = 0; indice < atendimentos.size(); indice++) {
-            if (atendimentos.get(indice).getId().equals(atendimento.getId())) {
+            if (atendimentos.get(indice).getId().equals(atendimento.getId())
+                    && entidadeCnpj.equals(atendimentos.get(indice).getEntidadeCnpj())) {
                 atendimentos.set(indice, atendimento);
                 return;
             }
@@ -53,8 +78,16 @@ public class InMemoryAtendimentoDao implements IAtendimentoDao{
     }
 
     @Override
-    public List<IAtendimentoModel> listarTodos() {
-        return List.copyOf(atendimentos);
+    public List<IAtendimentoModel> listarTodos(String entidadeCnpj) {
+        return atendimentos.stream()
+                .filter(atendimento -> entidadeCnpj.equals(atendimento.getEntidadeCnpj()))
+                .toList();
+    }
+
+    private static void exigirEntidade(String entidadeCnpj, String modeloCnpj) throws AtendimentoException {
+        if (entidadeCnpj == null || entidadeCnpj.isBlank() || !entidadeCnpj.equals(modeloCnpj)) {
+            throw new AtendimentoException("O atendimento não pertence à entidade autenticada.");
+        }
     }
     
 }

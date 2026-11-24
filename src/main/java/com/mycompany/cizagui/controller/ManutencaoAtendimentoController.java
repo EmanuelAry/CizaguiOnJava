@@ -12,7 +12,6 @@ import com.mycompany.cizagui.contracts.dao.IClienteDao;
 import com.mycompany.cizagui.contracts.dao.IProntuarioDao;
 import com.mycompany.cizagui.contracts.model.IAtendimentoModel;
 import com.mycompany.cizagui.contracts.model.IClienteModel;
-import com.mycompany.cizagui.dao.ClienteDao;
 import com.mycompany.cizagui.exeptions.AtendimentoException;
 import com.mycompany.cizagui.exeptions.EvolucaoException;
 import com.mycompany.cizagui.model.EvolucaoModel;
@@ -32,9 +31,10 @@ public class ManutencaoAtendimentoController implements IManutencaoAtendimentoCo
     private IProntuarioDao prontuarioDao;
     private INavegacao navegacao;
 
-    public ManutencaoAtendimentoController(IAtendimentoDao atendimentoDao, IProntuarioDao prontuarioDao, INavegacao navegacao) {
+    public ManutencaoAtendimentoController(IAtendimentoDao atendimentoDao, IClienteDao clienteDao,
+                                          IProntuarioDao prontuarioDao, INavegacao navegacao) {
         this.view = new ManutencaoAtendimentoView();
-        this.clienteDao = new ClienteDao();
+        this.clienteDao = clienteDao;
         this.atendimentoDao = atendimentoDao;
         this.prontuarioDao = prontuarioDao;
         this.navegacao = navegacao;
@@ -103,7 +103,7 @@ public class ManutencaoAtendimentoController implements IManutencaoAtendimentoCo
         }
         try {
             this.atendimentoSelecionado.atualizaStatus(novoStatus);
-            this.atendimentoDao.atualizar(this.atendimentoSelecionado);
+            this.atendimentoDao.atualizar(this.navegacao.exigirCnpjEntidadeAtual(), this.atendimentoSelecionado);
             if (!textoEvolucao.isBlank()) {
                 this.registrarEvolucao(textoEvolucao);
             }
@@ -120,12 +120,13 @@ public class ManutencaoAtendimentoController implements IManutencaoAtendimentoCo
         String autorNome = this.navegacao.getSessaoAtual() != null
                 ? this.navegacao.getSessaoAtual().getNome()
                 : "Administrador";
-        this.prontuarioDao.salvar(new EvolucaoModel(
-                this.atendimentoSelecionado.getId(), textoEvolucao, autorNome, LocalDateTime.now()));
+        this.prontuarioDao.salvar(this.navegacao.exigirCnpjEntidadeAtual(), new EvolucaoModel(
+                this.navegacao.exigirCnpjEntidadeAtual(), this.atendimentoSelecionado.getId(),
+                textoEvolucao, autorNome, LocalDateTime.now()));
     }
     
     private String nomeCliente(UUID clienteId) {
-        return this.clienteDao.buscarPorId(clienteId)
+        return this.clienteDao.buscarPorId(this.navegacao.exigirCnpjEntidadeAtual(), clienteId)
                 .map(IClienteModel::getNome)
                 .orElse("(cliente removido)");
     }

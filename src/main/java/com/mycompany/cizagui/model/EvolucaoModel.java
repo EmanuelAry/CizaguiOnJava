@@ -24,6 +24,9 @@ public class EvolucaoModel implements IEvolucaoModel{
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "entidade_cnpj", updatable = false)
+    private String entidadeCnpj;
+
     @Column(name = "atendimento_id", nullable = false)
     private UUID atendimentoId;
 
@@ -39,13 +42,14 @@ public class EvolucaoModel implements IEvolucaoModel{
     protected EvolucaoModel() {
     }
 
-    public EvolucaoModel(UUID atendimentoId, String texto, String autorNome, LocalDateTime registradaEm) throws EvolucaoException {
+    public EvolucaoModel(String entidadeCnpj, UUID atendimentoId, String texto, String autorNome, LocalDateTime registradaEm) throws EvolucaoException {
         this.id = UUID.randomUUID();
+        this.entidadeCnpj = entidadeCnpj;
         this.atendimentoId = atendimentoId;
         this.texto = texto;
         this.autorNome = autorNome;
         this.registradaEm = registradaEm;
-        validar(id, atendimentoId, texto, autorNome, registradaEm);
+        validar(id, entidadeCnpj, atendimentoId, texto, autorNome, registradaEm);
     }
     
     
@@ -53,6 +57,11 @@ public class EvolucaoModel implements IEvolucaoModel{
     @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public String getEntidadeCnpj() {
+        return entidadeCnpj;
     }
 
     @Override
@@ -77,16 +86,18 @@ public class EvolucaoModel implements IEvolucaoModel{
 
     @Override
     public void validaEvolucao() throws EvolucaoException {
-        validar(id, atendimentoId, texto, autorNome, registradaEm);
+        validar(id, entidadeCnpj, atendimentoId, texto, autorNome, registradaEm);
     }
     
-    private static void validar(UUID id, 
+    private static void validar(UUID id,
+                                String entidadeCnpj,
                                 UUID atendimentoId, 
                                 String texto, 
                                 String autorNome, 
                                 LocalDateTime registradaEm) throws EvolucaoException {
 
         if (id == null)               throw new EvolucaoException("Identificador é obrigatório");
+        if (entidadeCnpj == null || entidadeCnpj.isBlank()) throw new EvolucaoException("Entidade da evolução é obrigatória");
         if (atendimentoId == null)    throw new EvolucaoException("ID do Atendimento é obrigatório");
         if (texto == null)            throw new EvolucaoException("Texto é obrigatório");
         if (autorNome == null)        throw new EvolucaoException("Nome do autor é obrigatório");

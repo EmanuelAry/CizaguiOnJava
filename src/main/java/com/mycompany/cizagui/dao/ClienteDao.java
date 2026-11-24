@@ -25,14 +25,20 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
     }
 
     @Override
-    public void salvar(IClienteModel cliente) throws ClienteException {
+    public void salvar(String entidadeCnpj, IClienteModel cliente) throws ClienteException {
         ClienteModel modelo = exigir(cliente, ClienteModel.class);
+        exigirEntidade(entidadeCnpj, modelo.getEntidadeCnpj());
         abrirConexao();
         try {
             em.getTransaction().begin();
+            ClienteModel porId = em.find(ClienteModel.class, modelo.getId());
+            if (porId != null && !entidadeCnpj.equals(porId.getEntidadeCnpj())) {
+                throw new ClienteException("O cliente não pertence à entidade autenticada.");
+            }
             String cpfProcurado = normalizarCpf(modelo.getCpf());
             boolean duplicado = em
-                    .createQuery("from ClienteModel", ClienteModel.class)
+                    .createQuery("from ClienteModel c where c.entidadeCnpj = :entidadeCnpj", ClienteModel.class)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
                     .getResultList().stream()
                     .anyMatch(existente -> !existente.getId().equals(modelo.getId())
                             && normalizarCpf(existente.getCpf()).equals(cpfProcurado));
@@ -54,14 +60,15 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
     }
 
     @Override
-    public Optional<IClienteModel> buscarPorCpf(String cpf) {
+    public Optional<IClienteModel> buscarPorCpf(String entidadeCnpj, String cpf) {
         String procurado = normalizarCpf(cpf);
         ClienteModel encontrado = null;
         abrirConexao();
         try {
             em.getTransaction().begin();
             List<ClienteModel> clientes = em
-                    .createQuery("from ClienteModel", ClienteModel.class)
+                    .createQuery("from ClienteModel c where c.entidadeCnpj = :entidadeCnpj", ClienteModel.class)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
                     .getResultList();
             em.getTransaction().commit();
             for (ClienteModel cliente : clientes) {
@@ -81,12 +88,17 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
     }
 
     @Override
-    public Optional<IClienteModel> buscarPorId(UUID id) {
+    public Optional<IClienteModel> buscarPorId(String entidadeCnpj, UUID id) {
         ClienteModel encontrado = null;
         abrirConexao();
         try {
             em.getTransaction().begin();
-            encontrado = em.find(ClienteModel.class, id);
+            List<ClienteModel> encontrados = em
+                    .createQuery("from ClienteModel c where c.id = :id and c.entidadeCnpj = :entidadeCnpj", ClienteModel.class)
+                    .setParameter("id", id)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
+                    .getResultList();
+            encontrado = encontrados.isEmpty() ? null : encontrados.get(0);
             em.getTransaction().commit();
         } catch (RuntimeException e) {
             desfazer();
@@ -99,11 +111,16 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
     }
 
     @Override
-    public void excluir(UUID id) throws ClienteException {
+    public void excluir(String entidadeCnpj, UUID id) throws ClienteException {
         abrirConexao();
         try {
             em.getTransaction().begin();
-            ClienteModel cliente = em.find(ClienteModel.class, id);
+            List<ClienteModel> encontrados = em
+                    .createQuery("from ClienteModel c where c.id = :id and c.entidadeCnpj = :entidadeCnpj", ClienteModel.class)
+                    .setParameter("id", id)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
+                    .getResultList();
+            ClienteModel cliente = encontrados.isEmpty() ? null : encontrados.get(0);
             if (cliente != null) {
                 em.remove(cliente);
             }
@@ -118,13 +135,14 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
     }
 
     @Override
-    public List<IClienteModel> listarTodos() {
+    public List<IClienteModel> listarTodos(String entidadeCnpj) {
         List<IClienteModel> clientes = new ArrayList<>();
         abrirConexao();
         try {
             em.getTransaction().begin();
             List<ClienteModel> encontrados = em
-                    .createQuery("from ClienteModel", ClienteModel.class)
+                    .createQuery("from ClienteModel c where c.entidadeCnpj = :entidadeCnpj", ClienteModel.class)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
                     .getResultList();
             em.getTransaction().commit();
             clientes.addAll(encontrados);
@@ -140,5 +158,11 @@ public class ClienteDao extends BaseDAO implements IClienteDao {
 
     private static String normalizarCpf(String cpf) {
         return cpf == null ? "" : cpf.replaceAll("\\D", "");
+    }
+
+    private static void exigirEntidade(String entidadeCnpj, String modeloCnpj) throws ClienteException {
+        if (entidadeCnpj == null || entidadeCnpj.isBlank() || !entidadeCnpj.equals(modeloCnpj)) {
+            throw new ClienteException("O cliente não pertence à entidade autenticada.");
+        }
     }
 }

@@ -14,6 +14,7 @@ import com.mycompany.cizagui.exeptions.AtendimentoException;
  */
 public interface IAtendimentoModel {
     UUID getId();
+    String getEntidadeCnpj();
     UUID getClienteId();
     String getProcedimento();
     String getProfissional();

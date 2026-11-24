@@ -25,14 +25,21 @@ public class AtendimentoDao extends BaseDAO implements IAtendimentoDao {
     }
 
     @Override
-    public void salvar(IAtendimentoModel atendimento) throws AtendimentoException {
+    public void salvar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException {
         AtendimentoModel modelo = exigir(atendimento, AtendimentoModel.class);
+        exigirEntidade(entidadeCnpj, modelo.getEntidadeCnpj());
         abrirConexao();
         try {
             em.getTransaction().begin();
+            AtendimentoModel porId = em.find(AtendimentoModel.class, modelo.getId());
+            if (porId != null && !entidadeCnpj.equals(porId.getEntidadeCnpj())) {
+                throw new AtendimentoException("O atendimento não pertence à entidade autenticada.");
+            }
+            exigirClienteDaEntidade(entidadeCnpj, modelo.getClienteId());
             if (modelo.ocupaHorario()) {
                 boolean conflito = em
-                        .createQuery("from AtendimentoModel", AtendimentoModel.class)
+                        .createQuery("from AtendimentoModel a where a.entidadeCnpj = :entidadeCnpj", AtendimentoModel.class)
+                        .setParameter("entidadeCnpj", entidadeCnpj)
                         .getResultList().stream()
                         .filter(existente -> !existente.getId().equals(modelo.getId()))
                         .filter(existente -> existente.getClienteId().equals(modelo.getClienteId()))
@@ -57,12 +64,17 @@ public class AtendimentoDao extends BaseDAO implements IAtendimentoDao {
     }
 
     @Override
-    public Optional<IAtendimentoModel> buscarPorId(UUID id) {
+    public Optional<IAtendimentoModel> buscarPorId(String entidadeCnpj, UUID id) {
         AtendimentoModel encontrado = null;
         abrirConexao();
         try {
             em.getTransaction().begin();
-            encontrado = em.find(AtendimentoModel.class, id);
+            List<AtendimentoModel> encontrados = em
+                    .createQuery("from AtendimentoModel a where a.id = :id and a.entidadeCnpj = :entidadeCnpj", AtendimentoModel.class)
+                    .setParameter("id", id)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
+                    .getResultList();
+            encontrado = encontrados.isEmpty() ? null : encontrados.get(0);
             em.getTransaction().commit();
         } catch (RuntimeException e) {
             desfazer();
@@ -75,13 +87,33 @@ public class AtendimentoDao extends BaseDAO implements IAtendimentoDao {
     }
 
     @Override
-    public void atualizar(IAtendimentoModel atendimento) throws AtendimentoException {
+    public void atualizar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException {
         AtendimentoModel modelo = exigir(atendimento, AtendimentoModel.class);
+        exigirEntidade(entidadeCnpj, modelo.getEntidadeCnpj());
         abrirConexao();
         try {
             em.getTransaction().begin();
-            if (em.find(AtendimentoModel.class, modelo.getId()) == null) {
+            List<AtendimentoModel> existentes = em
+                    .createQuery("from AtendimentoModel a where a.id = :id and a.entidadeCnpj = :entidadeCnpj", AtendimentoModel.class)
+                    .setParameter("id", modelo.getId())
+                    .setParameter("entidadeCnpj", entidadeCnpj)
+                    .getResultList();
+            if (existentes.isEmpty()) {
                 throw new AtendimentoException("Atendimento não encontrado: " + modelo.getId());
+            }
+            exigirClienteDaEntidade(entidadeCnpj, modelo.getClienteId());
+            if (modelo.ocupaHorario()) {
+                boolean conflito = em
+                        .createQuery("from AtendimentoModel a where a.entidadeCnpj = :entidadeCnpj", AtendimentoModel.class)
+                        .setParameter("entidadeCnpj", entidadeCnpj)
+                        .getResultList().stream()
+                        .filter(existente -> !existente.getId().equals(modelo.getId()))
+                        .filter(existente -> existente.getClienteId().equals(modelo.getClienteId()))
+                        .filter(AtendimentoModel::ocupaHorario)
+                        .anyMatch(existente -> AtendimentoModel.horariosConflitam(existente, modelo));
+                if (conflito) {
+                    throw new AtendimentoException("Já existe um atendimento para este cliente em horário conflitante");
+                }
             }
             em.merge(modelo);
             em.getTransaction().commit();
@@ -98,13 +130,14 @@ public class AtendimentoDao extends BaseDAO implements IAtendimentoDao {
     }
 
     @Override
-    public List<IAtendimentoModel> listarTodos() {
+    public List<IAtendimentoModel> listarTodos(String entidadeCnpj) {
         List<IAtendimentoModel> atendimentos = new ArrayList<>();
         abrirConexao();
         try {
             em.getTransaction().begin();
             List<AtendimentoModel> encontrados = em
-                    .createQuery("from AtendimentoModel", AtendimentoModel.class)
+                    .createQuery("from AtendimentoModel a where a.entidadeCnpj = :entidadeCnpj", AtendimentoModel.class)
+                    .setParameter("entidadeCnpj", entidadeCnpj)
                     .getResultList();
             em.getTransaction().commit();
             atendimentos.addAll(encontrados);
@@ -116,5 +149,23 @@ public class AtendimentoDao extends BaseDAO implements IAtendimentoDao {
             fecharConexao();
         }
         return atendimentos;
+    }
+
+    private void exigirClienteDaEntidade(String entidadeCnpj, UUID clienteId) throws AtendimentoException {
+        Long quantidade = em.createQuery(
+                        "select count(c) from ClienteModel c where c.id = :clienteId and c.entidadeCnpj = :entidadeCnpj",
+                        Long.class)
+                .setParameter("clienteId", clienteId)
+                .setParameter("entidadeCnpj", entidadeCnpj)
+                .getSingleResult();
+        if (quantidade == 0L) {
+            throw new AtendimentoException("O cliente não pertence à entidade autenticada.");
+        }
+    }
+
+    private static void exigirEntidade(String entidadeCnpj, String modeloCnpj) throws AtendimentoException {
+        if (entidadeCnpj == null || entidadeCnpj.isBlank() || !entidadeCnpj.equals(modeloCnpj)) {
+            throw new AtendimentoException("O atendimento não pertence à entidade autenticada.");
+        }
     }
 }

@@ -15,9 +15,9 @@ import java.util.UUID;
  * @author ary
  */
 public interface IClienteDao {
-    void salvar(IClienteModel cliente) throws ClienteException;
-    Optional<IClienteModel> buscarPorCpf(String cpf);
-    Optional<IClienteModel> buscarPorId(UUID id);
-    void excluir(UUID id) throws ClienteException;
-    List<IClienteModel> listarTodos();
+    void salvar(String entidadeCnpj, IClienteModel cliente) throws ClienteException;
+    Optional<IClienteModel> buscarPorCpf(String entidadeCnpj, String cpf);
+    Optional<IClienteModel> buscarPorId(String entidadeCnpj, UUID id);
+    void excluir(String entidadeCnpj, UUID id) throws ClienteException;
+    List<IClienteModel> listarTodos(String entidadeCnpj);
 }

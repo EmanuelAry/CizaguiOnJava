@@ -15,10 +15,10 @@ import java.util.UUID;
  * @author ary
  */
 public interface IProntuarioDao {
-    void salvar(IEvolucaoModel evolucao) throws EvolucaoException;
-    Optional<IEvolucaoModel> buscarEvolucaoPorId(UUID evolucaoId);
-    Optional<IEvolucaoModel> buscarEvolucaoPorAtendimento(UUID atendimentoId);
-    List<IEvolucaoModel> listarEvolucoes();
+    void salvar(String entidadeCnpj, IEvolucaoModel evolucao) throws EvolucaoException;
+    Optional<IEvolucaoModel> buscarEvolucaoPorId(String entidadeCnpj, UUID evolucaoId);
+    Optional<IEvolucaoModel> buscarEvolucaoPorAtendimento(String entidadeCnpj, UUID atendimentoId);
+    List<IEvolucaoModel> listarEvolucoes(String entidadeCnpj);
     /* capei fora para diminuir o escopo */
     //void salvar(AnotacaoComplementar anotacao);
     //List<AnotacaoComplementar> listarAnotacoes(UUID evolucaoId);

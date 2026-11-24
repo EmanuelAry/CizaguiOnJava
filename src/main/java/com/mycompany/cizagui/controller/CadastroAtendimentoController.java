@@ -51,7 +51,7 @@ public class CadastroAtendimentoController implements ICadastroAtendimentoContro
     public void acaoSalvar() {
         try {
             this.model = this.getDadosAtendimentoFromView();
-            this.atendimentoDao.salvar(model);
+            this.atendimentoDao.salvar(this.navegacao.exigirCnpjEntidadeAtual(), model);
             this.view.exibirMensagem("Atendimento cadastrado com sucesso!");
             this.view.limparCampos();
             this.navegacao.exibirConsultaAtendimentos();
@@ -68,7 +68,7 @@ public class CadastroAtendimentoController implements ICadastroAtendimentoContro
 
     @Override
     public void prepararTela() {
-        this.clientes = this.clienteDao.listarTodos();
+        this.clientes = this.clienteDao.listarTodos(this.navegacao.exigirCnpjEntidadeAtual());
         this.view.carregarClientes(this.clientes.stream().map(IClienteModel::getNome).toList());
     }
 
@@ -92,7 +92,8 @@ public class CadastroAtendimentoController implements ICadastroAtendimentoContro
         if(view.getDuracao() > 0){
             fim = inicio.plusMinutes(view.getDuracao());
         }
-        return new AtendimentoModel(this.clientes.get(indiceCliente).getId(), procedimento, profissional, inicio, fim);
+        return new AtendimentoModel(this.navegacao.exigirCnpjEntidadeAtual(),
+                this.clientes.get(indiceCliente).getId(), procedimento, profissional, inicio, fim);
     }
 
     private LocalDate parseData(String data) throws AtendimentoException {

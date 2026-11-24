@@ -15,8 +15,8 @@ import java.util.UUID;
  * @author ary
  */
 public interface IAtendimentoDao {
-    void salvar(IAtendimentoModel atendimento) throws AtendimentoException;
-    Optional<IAtendimentoModel> buscarPorId(UUID id);
-    void atualizar(IAtendimentoModel atendimento) throws AtendimentoException;
-    List<IAtendimentoModel> listarTodos();
+    void salvar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException;
+    Optional<IAtendimentoModel> buscarPorId(String entidadeCnpj, UUID id);
+    void atualizar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException;
+    List<IAtendimentoModel> listarTodos(String entidadeCnpj);
 }

@@ -24,6 +24,9 @@ public class ClienteModel implements IClienteModel{
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "entidade_cnpj", updatable = false)
+    private String entidadeCnpj;
+
     @Column(name = "nome", nullable = false)
     private String nome;
 
@@ -42,29 +45,36 @@ public class ClienteModel implements IClienteModel{
     protected ClienteModel() {
     }
 
-    public ClienteModel(String nome, String cpf, LocalDate dataNascimento, String telefone, String email) throws ClienteException {
+    public ClienteModel(String entidadeCnpj, String nome, String cpf, LocalDate dataNascimento, String telefone, String email) throws ClienteException {
         this.id = UUID.randomUUID();
+        this.entidadeCnpj = entidadeCnpj;
         this.nome = nome; 
         this.cpf = cpf; 
         this.dataNascimento = dataNascimento; 
         this.telefone = telefone; 
         this.email = email;
-        validar(this.id, this.nome, this.cpf, this.dataNascimento, this.telefone, this.email);
+        validar(this.id, this.entidadeCnpj, this.nome, this.cpf, this.dataNascimento, this.telefone, this.email);
     }
     
-    public ClienteModel(UUID id, String nome, String cpf, LocalDate dataNascimento, String telefone, String email) throws ClienteException {
+    public ClienteModel(UUID id, String entidadeCnpj, String nome, String cpf, LocalDate dataNascimento, String telefone, String email) throws ClienteException {
         this.id = id;
+        this.entidadeCnpj = entidadeCnpj;
         this.nome = nome; 
         this.cpf = cpf; 
         this.dataNascimento = dataNascimento; 
         this.telefone = telefone; 
         this.email = email;
-        validar(this.id, this.nome, this.cpf, this.dataNascimento, this.telefone, this.email);
+        validar(this.id, this.entidadeCnpj, this.nome, this.cpf, this.dataNascimento, this.telefone, this.email);
     }
 
     @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public String getEntidadeCnpj() {
+        return entidadeCnpj;
     }
 
     @Override
@@ -94,10 +104,11 @@ public class ClienteModel implements IClienteModel{
     
     @Override
     public void validaCliente() throws ClienteException {
-        validar(id, nome, cpf, dataNascimento, telefone, email); 
+        validar(id, entidadeCnpj, nome, cpf, dataNascimento, telefone, email);
     }
     
     private static void validar(UUID id,
+                            String entidadeCnpj,
                             String nome,
                             String cpf,
                             LocalDate dataNascimento,
@@ -105,6 +116,7 @@ public class ClienteModel implements IClienteModel{
                             String email) throws ClienteException {
 
         if (id == null)               throw new ClienteException("ID é obrigatório");
+        if (entidadeCnpj == null || entidadeCnpj.isBlank()) throw new ClienteException("Entidade do cliente é obrigatória");
         if (nome == null)             throw new ClienteException("Nome é obrigatório");
         if (cpf == null)              throw new ClienteException("CPF é obrigatório");
         if (dataNascimento == null)   throw new ClienteException("Data de nascimento é obrigatória");

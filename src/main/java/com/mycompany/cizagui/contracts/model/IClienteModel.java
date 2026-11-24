@@ -12,6 +12,7 @@ import java.time.LocalDate;
  */
 public interface IClienteModel {
     UUID getId();
+    String getEntidadeCnpj();
     String getNome();
     String getCpf();
     LocalDate getDataNascimento();

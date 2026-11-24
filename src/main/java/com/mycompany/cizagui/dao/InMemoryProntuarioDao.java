@@ -21,25 +21,36 @@ public class InMemoryProntuarioDao implements IProntuarioDao{
     private final Map<UUID, IEvolucaoModel> evolucoes = new LinkedHashMap<>();
 
     @Override
-    public void salvar(IEvolucaoModel evolucao) {
+    public void salvar(String entidadeCnpj, IEvolucaoModel evolucao) {
+        exigirEntidade(entidadeCnpj, evolucao.getEntidadeCnpj());
         evolucoes.put(evolucao.getId(), evolucao);
     }
 
     @Override
-    public Optional<IEvolucaoModel> buscarEvolucaoPorId(UUID evolucaoId) {
-        return Optional.ofNullable(evolucoes.get(evolucaoId));
+    public Optional<IEvolucaoModel> buscarEvolucaoPorId(String entidadeCnpj, UUID evolucaoId) {
+        return Optional.ofNullable(evolucoes.get(evolucaoId))
+                .filter(evolucao -> entidadeCnpj.equals(evolucao.getEntidadeCnpj()));
     }
 
     @Override
-    public Optional<IEvolucaoModel> buscarEvolucaoPorAtendimento(UUID atendimentoId) {
+    public Optional<IEvolucaoModel> buscarEvolucaoPorAtendimento(String entidadeCnpj, UUID atendimentoId) {
         return evolucoes.values().stream()
+                .filter(evolucao -> entidadeCnpj.equals(evolucao.getEntidadeCnpj()))
                 .filter(evolucao -> evolucao.getAtendimentoId().equals(atendimentoId))
                 .findFirst();
     }
 
     @Override
-    public List<IEvolucaoModel> listarEvolucoes() {
-        return List.copyOf(evolucoes.values());
+    public List<IEvolucaoModel> listarEvolucoes(String entidadeCnpj) {
+        return evolucoes.values().stream()
+                .filter(evolucao -> entidadeCnpj.equals(evolucao.getEntidadeCnpj()))
+                .toList();
+    }
+
+    private static void exigirEntidade(String entidadeCnpj, String modeloCnpj) {
+        if (entidadeCnpj == null || entidadeCnpj.isBlank() || !entidadeCnpj.equals(modeloCnpj)) {
+            throw new IllegalArgumentException("A evolução não pertence à entidade autenticada.");
+        }
     }
     
 }

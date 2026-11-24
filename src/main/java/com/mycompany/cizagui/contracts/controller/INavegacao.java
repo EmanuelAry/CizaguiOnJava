@@ -23,4 +23,12 @@ public interface INavegacao {
     void exibirCadastroAtendimento();
     void exibirManutencaoAtendimento(IAtendimentoModel atendimento);
     SessaoUsuario getSessaoAtual();
+
+    default String exigirCnpjEntidadeAtual() {
+        SessaoUsuario sessao = getSessaoAtual();
+        if (sessao == null || sessao.getCnpj() == null || sessao.getCnpj().isBlank()) {
+            throw new IllegalStateException("É necessário entrar em uma entidade para acessar os dados.");
+        }
+        return sessao.getCnpj();
+    }
 }

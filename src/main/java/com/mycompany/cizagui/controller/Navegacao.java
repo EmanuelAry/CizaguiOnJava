@@ -49,7 +49,8 @@ public class Navegacao implements INavegacao {
         this.cadastroAtendimentoController = new CadastroAtendimentoController(atendimentoDao, clienteDao, this);
         this.consultaClienteController = new ConsultaClienteController(clienteDao, this);
         this.manutencaoClienteController = new ManutencaoClienteController(clienteDao, this);
-        this.manutencaoAtendimentoController = new ManutencaoAtendimentoController(atendimentoDao, prontuarioDao, this);
+        this.manutencaoAtendimentoController = new ManutencaoAtendimentoController(
+                atendimentoDao, clienteDao, prontuarioDao, this);
     }
 
     @Override

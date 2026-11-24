@@ -25,6 +25,9 @@ public class AtendimentoModel implements IAtendimentoModel{
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "entidade_cnpj", updatable = false)
+    private String entidadeCnpj;
+
     @Column(name = "cliente_id", nullable = false)
     private UUID clienteId;
 
@@ -48,21 +51,27 @@ public class AtendimentoModel implements IAtendimentoModel{
     protected AtendimentoModel() {
     }
 
-    public AtendimentoModel(UUID clienteId, String procedimento, String profissional, LocalDateTime inicio, LocalDateTime fim) throws AtendimentoException {
+    public AtendimentoModel(String entidadeCnpj, UUID clienteId, String procedimento, String profissional, LocalDateTime inicio, LocalDateTime fim) throws AtendimentoException {
         this.id = UUID.randomUUID();
+        this.entidadeCnpj = entidadeCnpj;
         this.clienteId = clienteId; 
         this.procedimento = procedimento;
         this.profissional = profissional;
         this.inicio = inicio;
         this.fim = fim;
         this.status = StatusAtendimentoEnum.AGENDADO;
-        validar(this.id, this.clienteId, this.procedimento,
+        validar(this.id, this.entidadeCnpj, this.clienteId, this.procedimento,
             this.profissional, this.inicio, this.fim, this.status);
     }
     
     @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public String getEntidadeCnpj() {
+        return entidadeCnpj;
     }
 
 
@@ -103,10 +112,11 @@ public class AtendimentoModel implements IAtendimentoModel{
 
        @Override
     public void validaAtendimento() throws AtendimentoException {
-        validar(id, clienteId, procedimento, profissional, inicio, fim, status);
+        validar(id, entidadeCnpj, clienteId, procedimento, profissional, inicio, fim, status);
     }
     
     private static void validar(UUID id,
+                            String entidadeCnpj,
                             UUID clienteId,
                             String procedimento,
                             String profissional,
@@ -116,6 +126,7 @@ public class AtendimentoModel implements IAtendimentoModel{
         throws AtendimentoException {
 
     if (id == null)             throw new AtendimentoException("Identificador é obrigatório");
+    if (entidadeCnpj == null || entidadeCnpj.isBlank()) throw new AtendimentoException("Entidade do atendimento é obrigatória");
     if (clienteId == null)      throw new AtendimentoException("ID do Cliente é obrigatório");
     if (procedimento == null || procedimento.isBlank()) throw new AtendimentoException("Procedimento é obrigatório");
     if (profissional == null || profissional.isBlank()) throw new AtendimentoException("Profissional é obrigatório");

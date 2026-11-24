@@ -63,7 +63,7 @@ public class ConsultaClienteController implements IConsultaClienteController {
 
     @Override
     public void atualizarListagem() {
-        this.clientes = this.clienteDao.listarTodos();
+        this.clientes = this.clienteDao.listarTodos(this.navegacao.exigirCnpjEntidadeAtual());
         String[][] linhas = this.clientes.stream()
                 .map(cliente -> new String[]{
                     cliente.getNome(),
