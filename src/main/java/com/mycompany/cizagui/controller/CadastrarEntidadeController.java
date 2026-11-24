@@ -36,10 +36,6 @@ public class CadastrarEntidadeController implements ICadastrarEntidadeController
 
     public CadastrarEntidadeController(IEntidadeDao entidadeDao, IContaAcessoDao contaDao, INavegacao navegacao) {
         this.view = new CadastrarEntidadeView();
-        /* A view é um JPanel, então precisa de uma janela
-           para ser exibida. Sem este JFrame, setVisible(true) não abre nada e,
-           como a tela de login já foi escondida, a aplicação encerra por ficar
-           sem janelas visíveis. */
         this.janela = new javax.swing.JFrame("Cadastrar Clínica");
         this.janela.setContentPane(this.view);
         this.janela.setDefaultCloseOperation(javax.swing.JFrame.DO_NOTHING_ON_CLOSE);
