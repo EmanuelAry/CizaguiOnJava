@@ -7,6 +7,7 @@ com/mycompany/cizagui/dao/InMemoryClienteDao.class
 com/mycompany/cizagui/view/ManutencaoAtendimentoView.class
 com/mycompany/cizagui/contracts/model/IClienteModel.class
 com/mycompany/cizagui/view/LoginView.class
+com/mycompany/cizagui/view/CadastrarEntidadeView$1.class
 com/mycompany/cizagui/contracts/controller/ILoginController.class
 com/mycompany/cizagui/contracts/dao/IClienteDao.class
 com/mycompany/cizagui/controller/ManutencaoAtendimentoController.class
@@ -28,7 +29,6 @@ com/mycompany/cizagui/model/SessaoUsuario.class
 com/mycompany/cizagui/model/EntidadeModel.class
 com/mycompany/cizagui/view/CadastroAtendimentoView$1.class
 com/mycompany/cizagui/exeptions/EvolucaoException.class
-com/mycompany/cizagui/controller/CadastrarEntidadeController$1.class
 com/mycompany/cizagui/Cizagui.class
 com/mycompany/cizagui/controller/CadastroAtendimentoController.class
 com/mycompany/cizagui/dao/ProntuarioDao.class

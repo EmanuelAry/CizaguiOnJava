@@ -133,16 +133,15 @@ public class AtendimentoModel implements IAtendimentoModel{
     if (inicio == null)         throw new AtendimentoException("Horário de início é obrigatório");
     if (fim == null)            throw new AtendimentoException("Horário de término é obrigatório");
     if (status == null)         throw new AtendimentoException("Status é obrigatório");
-    if (!fim.isAfter(inicio))   throw new AtendimentoException("O término deve ser posterior ao início");
+    if (fim.compareTo(inicio) <= 0) {
+        throw new AtendimentoException("O término deve ser posterior ao início");
+    }
 }
 
-    /**
-     * Dois atendimentos conflitam quando seus intervalos [inicio, fim) se
-     * intersectam. Intervalos apenas encostados (fim de um == início do
-     * outro) não conflitam.
-     */
+
     public static boolean horariosConflitam(IAtendimentoModel a, IAtendimentoModel b) {
-        return a.getInicio().isBefore(b.getFim()) && b.getInicio().isBefore(a.getFim());
+        return a.getInicio().compareTo(b.getFim()) < 0
+                && b.getInicio().compareTo(a.getFim()) < 0;
     }
 
        @Override

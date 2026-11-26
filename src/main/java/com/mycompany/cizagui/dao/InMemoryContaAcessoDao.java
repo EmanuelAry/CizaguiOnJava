@@ -17,7 +17,7 @@ import com.mycompany.cizagui.contracts.dao.IContaAcessoDao;
  * @author ary
  */
 public class InMemoryContaAcessoDao implements IContaAcessoDao{
-    private final Map<String, IContaAcessoModel> contas = new LinkedHashMap<>();
+    private static final Map<String, IContaAcessoModel> contas = new LinkedHashMap<>();
 
     @Override
     public boolean estaVazio() {

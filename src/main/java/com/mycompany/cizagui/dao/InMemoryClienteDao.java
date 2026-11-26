@@ -18,7 +18,7 @@ import com.mycompany.cizagui.contracts.dao.IClienteDao;
  * @author ary
  */
 public class InMemoryClienteDao implements IClienteDao {
-    public Map<UUID, IClienteModel> clientes = new LinkedHashMap<>();
+    public static final Map<UUID, IClienteModel> clientes = new LinkedHashMap<>();
             
     @Override
     public void salvar(String entidadeCnpj, IClienteModel cliente) throws ClienteException {

@@ -27,7 +27,6 @@ import java.security.SecureRandom;
  */
 public class CadastrarEntidadeController implements ICadastrarEntidadeController {
     private CadastrarEntidadeView view;
-    private javax.swing.JFrame janela;
     private IEntidadeModel entidadeModel;
     private IContaAcessoModel contaModel;
     private IEntidadeDao entidadeDao;
@@ -36,17 +35,6 @@ public class CadastrarEntidadeController implements ICadastrarEntidadeController
 
     public CadastrarEntidadeController(IEntidadeDao entidadeDao, IContaAcessoDao contaDao, INavegacao navegacao) {
         this.view = new CadastrarEntidadeView();
-        this.janela = new javax.swing.JFrame("Cadastrar Clínica");
-        this.janela.setContentPane(this.view);
-        this.janela.setDefaultCloseOperation(javax.swing.JFrame.DO_NOTHING_ON_CLOSE);
-        this.janela.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent e) {
-                acaoVoltar();
-            }
-        });
-        this.janela.pack();
-        this.janela.setLocationRelativeTo(null);
         this.entidadeDao = entidadeDao;
         this.contaDao = contaDao;
         this.navegacao = navegacao;
@@ -55,13 +43,14 @@ public class CadastrarEntidadeController implements ICadastrarEntidadeController
 
     @Override
     public void mudaVisibilidade(boolean b) {
-        this.janela.setVisible(b);
+        this.view.setVisible(b);
     }
 
     @Override
     public void adicionarAcoes() {
         view.adicionarAcaoBtnCadastrar(e -> acaoCadastrarEntidade());
         view.adicionarAcaoBtnVoltar(e -> acaoVoltar());
+        view.adicionarAcaoFechar(this::acaoVoltar);
     }
 
     @Override

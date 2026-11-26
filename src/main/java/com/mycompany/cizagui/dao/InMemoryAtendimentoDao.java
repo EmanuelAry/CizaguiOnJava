@@ -18,7 +18,7 @@ import com.mycompany.cizagui.contracts.dao.IAtendimentoDao;
  * @author ary
  */
 public class InMemoryAtendimentoDao implements IAtendimentoDao{
-    private final List<IAtendimentoModel> atendimentos = new ArrayList<>();
+    private static final List<IAtendimentoModel> atendimentos = new ArrayList<>();
     
     @Override
     public void salvar(String entidadeCnpj, IAtendimentoModel atendimento) throws AtendimentoException {

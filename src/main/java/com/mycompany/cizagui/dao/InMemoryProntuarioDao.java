@@ -18,7 +18,7 @@ import com.mycompany.cizagui.contracts.dao.IProntuarioDao;
  */
 public class InMemoryProntuarioDao implements IProntuarioDao{
 
-    private final Map<UUID, IEvolucaoModel> evolucoes = new LinkedHashMap<>();
+    private static final Map<UUID, IEvolucaoModel> evolucoes = new LinkedHashMap<>();
 
     @Override
     public void salvar(String entidadeCnpj, IEvolucaoModel evolucao) {

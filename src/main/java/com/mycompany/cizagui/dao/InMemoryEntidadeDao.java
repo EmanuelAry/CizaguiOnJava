@@ -19,7 +19,7 @@ import com.mycompany.cizagui.contracts.dao.IEntidadeDao;
  */
 public class InMemoryEntidadeDao implements IEntidadeDao{
     
-    private final Map<String, IEntidadeModel> entidadesPorCnpj = new LinkedHashMap<>();
+    private static final Map<String, IEntidadeModel> entidadesPorCnpj = new LinkedHashMap<>();
     
     @Override
     public boolean estaVazio() {

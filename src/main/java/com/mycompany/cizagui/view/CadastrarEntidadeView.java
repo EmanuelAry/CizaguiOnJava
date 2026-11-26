@@ -1,23 +1,42 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.mycompany.cizagui.view;
 
 import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  *
  * @author ary
  */
-public class CadastrarEntidadeView extends javax.swing.JPanel {
+public class CadastrarEntidadeView extends javax.swing.JFrame {
+
+    private Runnable acaoFechar = () -> {};
 
     /**
      * Creates new form CadastrarEntidadeView
      */
     public CadastrarEntidadeView() {
         initComponents();
+        setTitle("Cadastrar Clínica");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                acaoFechar.run();
+            }
+        });
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    public void adicionarAcaoFechar(Runnable acao) {
+        this.acaoFechar = acao;
     }
     
     public void adicionarAcaoBtnCadastrar(ActionListener acao){
@@ -103,8 +122,8 @@ public class CadastrarEntidadeView extends javax.swing.JPanel {
 
         btnCadastrar.setText("+ Cadastrar Clinica");
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
